@@ -7,7 +7,8 @@ WORKDIR /app
 # Cập nhật pip và cài đặt các gói hệ thống cần thiết (nếu có)
 # unstructured cần poppler-utils để xử lý PDF.
 # tesseract-ocr là một engine OCR mạnh mẽ mà unstructured có thể sử dụng.
-RUN apt-get update && apt-get install -y poppler-utils tesseract-ocr
+# libgl1-mesa-glx là thư viện đồ họa cần thiết cho OpenCV (một dependency của unstructured).
+RUN apt-get update && apt-get install -y poppler-utils tesseract-ocr libgl1-mesa-glx
 
 # Sao chép file requirements.txt trước để tận dụng cache của Docker
 COPY requirements.txt .
