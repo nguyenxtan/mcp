@@ -2,7 +2,7 @@
 import os
 import asyncio
 import uvicorn
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Depends, HTTPException, status, Header
 from fastapi.responses import StreamingResponse
 from bs4 import BeautifulSoup
 from typing import Optional
@@ -17,7 +17,23 @@ app = FastAPI()
 
 # --- Environment & Service Configuration ---
 OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY")
+SERVER_API_KEY = os.getenv("SERVER_API_KEY") # Lấy API key của server
 DEFAULT_SUMMARY_MODEL = "anthropic/claude-3.5-sonnet"
+
+# --- Security Dependency ---
+
+async def verify_api_key(x_api_key: str = Header(None)):
+    """
+    Dependency function to verify the API key from the request header.
+    """
+    if not SERVER_API_KEY:
+        # Nếu không có SERVER_API_KEY trong .env, server sẽ không an toàn.
+        # Ném lỗi để ngăn chặn việc triển khai không an toàn.
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Server is not configured with an API key.")
+    
+    if not x_api_key or x_api_key != SERVER_API_KEY:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing API Key")
+    return x_api_key
 
 # --- Helper Functions ---
 
@@ -42,7 +58,10 @@ def read_root():
     return {"message": "MCP Server is running."}
 
 @app.get("/summarize-url/")
-async def summarize_url(url: str = Query(..., description="The URL of the webpage to summarize.")):
+async def summarize_url(
+    url: str = Query(..., description="The URL of the webpage to summarize."),
+    api_key: str = Depends(verify_api_key) # Thêm "bảo vệ" vào endpoint này
+):
     """
     Fetches the content of a URL, summarizes it, and streams the progress using Server-Sent Events (SSE).
 
@@ -54,6 +73,7 @@ async def summarize_url(url: str = Query(..., description="The URL of the webpag
 
     Args:
         url: The URL of the webpage to summarize.
+        api_key: (Dependency) The verified API key.
 
     Returns:
         A StreamingResponse that sends events to the client.
