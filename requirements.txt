@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+python-telegram-bot
+requests
+python-dotenv
+PyPDF2 # docling might require this
+docling # For OCR
+httpx # For async HTTP requests

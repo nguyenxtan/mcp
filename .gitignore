@@ -1,0 +1,21 @@
+# Environment variables
+# Contains sensitive keys, should never be committed.
+.env
+
+# Python virtual environment
+# This can be recreated from requirements.txt
+venv/
+
+# Python cache files
+__pycache__/
+*.pyc
+
+# Temporary download directory
+downloads/
+
+# IDE configuration files
+.idea/
+.vscode/
+
+# macOS system files
+.DS_Store
