@@ -157,22 +157,26 @@ async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends a detailed help message explaining how to use the bot."""
     help_text = """<b>🌟 Chào mừng bạn đến với Bot Trợ Lý Đa Năng! 🌟</b>
-
+    
 Tôi có thể giúp bạn với nhiều loại tệp khác nhau.
-
+    
 <b>Cách sử dụng:</b>
-1. <b>Với tài liệu (<code>.pdf</code>, <code>.docx</code>, v.v.):</b> Gửi file cho tôi, tôi sẽ trích xuất văn bản và bạn có thể yêu cầu tôi tóm tắt.
-2. <b>Với âm thanh (file audio, tin nhắn thoại):</b> Gửi file hoặc ghi âm một tin nhắn thoại, tôi sẽ gỡ băng và gửi lại văn bản cho bạn.
-
-<b>Các mô hình AI hỗ trợ tóm tắt:</b>
+1.  <b>Với tài liệu (<code>.pdf</code>, <code>.docx</code>, v.v.):</b> Gửi file cho tôi, tôi sẽ trích xuất văn bản và bạn có thể yêu cầu tôi tóm tắt nội dung đó (*).
+2.  <b>Với âm thanh (file audio, tin nhắn thoại) (*):</b> Gửi file hoặc ghi âm một tin nhắn thoại, tôi sẽ chuyển đổi giọng nói thành văn bản cho bạn.
+    
+<b>Các mô hình AI hỗ trợ tóm tắt (*):</b>
 - Claude 3.5 Sonnet (Mặc định)
 - Gemini 1.5 Flash
 - GPT-4o Mini
-
-<b>Mô hình gỡ băng:</b>
+    
+<b>Mô hình chuyển đổi giọng nói thành văn bản (*):</b>
 - OpenAI Whisper
-
-Hãy gửi file đầu tiên của bạn để bắt đầu nào!"""
+    
+---
+<b>Lưu ý quan trọng:</b>
+Các tính năng có đánh dấu (*) sẽ sử dụng API của bên thứ ba (OpenRouter, OpenAI) và có thể phát sinh chi phí. Vui lòng thử nghiệm một cách hợp lý để tiết kiệm chi phí nhé!
+    
+Hãy gửi file đầu tiên của bạn để bắt đầu nào! 🚀"""
     await update.message.reply_html(help_text, message_thread_id=15)
 
 async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
