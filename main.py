@@ -37,7 +37,7 @@ DEFAULT_MODEL = "anthropic/claude-3.5-sonnet"
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Sends a welcome message when the /start command is issued."""
     user = update.effective_user
-    await update.message.reply_html(rf"Hi {user.mention_html()}! Send me a document or an audio file.", message_thread_id=15)
+    await update.message.reply_html(rf"Hi {user.mention_html()}! Send me a document or an audio file.")
 
 async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """
@@ -49,10 +49,10 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
     
     ALLOWED_EXTENSIONS = ('.pdf', '.png', '.jpg', '.jpeg', '.docx', '.pptx')
     if not file_name.lower().endswith(ALLOWED_EXTENSIONS):
-        await update.message.reply_text(f"Sorry, I can only process the following file types: {', '.join(ALLOWED_EXTENSIONS)}", message_thread_id=15)
+        await update.message.reply_text(f"Sorry, I can only process the following file types: {', '.join(ALLOWED_EXTENSIONS)}")
         return
 
-    progress_message = await update.message.reply_text(f"⏳ Đang xử lý file: {file_name}\n[10%] Đã nhận file.", message_thread_id=15)
+    progress_message = await update.message.reply_text(f"⏳ Đang xử lý file: {file_name}\n[10%] Đã nhận file.")
     
     file = await context.bot.get_file(document.file_id)
     original_file_path = f"downloads/{document.file_id}_{file_name}"
@@ -177,18 +177,18 @@ Tôi có thể giúp bạn với nhiều loại tệp khác nhau.
 Các tính năng có đánh dấu (*) sẽ sử dụng API của bên thứ ba (OpenRouter, OpenAI) và có thể phát sinh chi phí. Vui lòng thử nghiệm một cách hợp lý để tiết kiệm chi phí nhé!
     
 Hãy gửi file đầu tiên của bạn để bắt đầu nào! 🚀"""
-    await update.message.reply_html(help_text, message_thread_id=15)
+    await update.message.reply_html(help_text)
 
 async def handle_text_message(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles plain text messages by asking the user to send a file instead."""
-    await update.message.reply_text("Please send me a document or an audio file to process.", message_thread_id=15)
+    await update.message.reply_text("Please send me a document or an audio file to process.")
 
 async def handle_audio(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles incoming audio or voice messages for transcription."""
     audio_obj = update.message.audio or update.message.voice
     file_name = audio_obj.file_name if hasattr(audio_obj, 'file_name') and audio_obj.file_name else f"voice_note_{audio_obj.file_id}.ogg"
 
-    progress_message = await update.message.reply_text(f"⏳ Đang xử lý file audio: {file_name}", message_thread_id=15)
+    progress_message = await update.message.reply_text(f"⏳ Đang xử lý file audio: {file_name}")
 
     file = await context.bot.get_file(audio_obj.file_id)
     original_file_path = f"downloads/{audio_obj.file_id}_{file_name}"
