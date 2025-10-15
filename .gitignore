@@ -19,3 +19,6 @@ downloads/
 
 # macOS system files
 .DS_Store
+
+# ChromaDB persistent storage
+chroma_data/

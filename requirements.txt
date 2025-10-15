@@ -5,3 +5,12 @@ requests
 python-dotenv
 httpx # For async HTTP requests
 unstructured[pdf,docx,pptx] # Powerful library for document parsing
+langchain
+sentence-transformers
+transformers<4.31.0 # Pin version to be compatible with Python 3.9
+torch # Add torch explicitly for sentence-transformers
+langchain-community
+huggingface-hub~=0.17.3 # Pin to a specific compatible version for sentence-transformers
+chromadb
+beautifulsoup4
+PyMuPDF
