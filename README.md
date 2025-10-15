@@ -5,11 +5,11 @@ Dự án này là một bot Telegram được xây dựng bằng Python, có kh�
 ## Tính năng chính
 
 - **Xử lý tài liệu (OCR):**
-  - Nhận các tệp `.pdf`, `.docx`, `.pptx`, `.png`, `.jpg`.
-  - Sử dụng thư viện `docling` để trích xuất văn bản từ hình ảnh và tài liệu.
+  - Nhận các tệp `.pdf`, `.docx`, `.pptx`, `.png`, `.jpg` và nhiều định dạng khác.
+  - Sử dụng thư viện `unstructured.io` mạnh mẽ để phân tích và trích xuất văn bản, có khả năng nhận diện và giữ nguyên cấu trúc của bảng biểu.
   - Cung cấp tùy chọn xem toàn bộ nội dung hoặc tóm tắt.
 - **Tóm tắt văn bản:**
-  - Tích hợp với **OpenRouter** để truy cập các mô hình ngôn ngữ lớn (LLM) hàng đầu.
+  - Tích hợp với **OpenRouter** để truy cập các mô hình ngôn ngữ lớn (LLM) hàng đầu cho việc tóm tắt.
   - Các mô hình được hỗ trợ: `Claude 3.5 Sonnet`, `Gemini 1.5 Flash`, `GPT-4o Mini`.
   - Người dùng có thể chọn mô hình mình muốn sử dụng.
 - **Gỡ băng âm thanh:**
@@ -24,14 +24,14 @@ Dự án này là một bot Telegram được xây dựng bằng Python, có kh�
 - **Ngôn ngữ:** **Python 3**
 - **Thư viện chính:**
   - `python-telegram-bot`: Framework để xây dựng bot.
-  - `docling`: Thư viện OCR để xử lý tài liệu.
-  - `requests`: Để thực hiện các cuộc gọi API đến dịch vụ bên ngoài.
+  - `unstructured`: Thư viện phân tích và trích xuất dữ liệu từ tài liệu phức tạp.
+  - `httpx`: Thư viện client HTTP bất đồng bộ để gọi API.
   - `python-dotenv`: Để quản lý các biến môi trường.
 - **Kiến trúc:**
   - **Event-Driven (Hướng sự kiện):** Bot phản ứng với các hành động của người dùng (gửi tin nhắn, tệp, nhấn nút).
   - **API Integration:** Bot hoạt động như một trung tâm điều phối, gọi đến các API của bên thứ ba để thực hiện các tác vụ cốt lõi:
     - **Telegram API:** Giao tiếp với người dùng.
-    - **OpenRouter API:** Dùng cho việc tóm tắt văn bản.
+    - **OpenRouter API:** Dùng cho việc tóm tắt.
     - **OpenAI API:** Dùng cho việc gỡ băng âm thanh.
   - **Asynchronous (Bất đồng bộ):** Tận dụng `asyncio` của Python để xử lý đồng thời nhiều tác vụ (như tải tệp, gọi API) mà không làm block luồng chính, giúp bot luôn phản hồi nhanh chóng.
 

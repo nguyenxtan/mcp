@@ -5,8 +5,9 @@ FROM python:3.9-slim
 WORKDIR /app
 
 # Cập nhật pip và cài đặt các gói hệ thống cần thiết (nếu có)
-# Ví dụ: một số thư viện OCR có thể cần các gói bổ sung
-# RUN apt-get update && apt-get install -y ...
+# unstructured cần poppler-utils để xử lý PDF.
+# tesseract-ocr là một engine OCR mạnh mẽ mà unstructured có thể sử dụng.
+RUN apt-get update && apt-get install -y poppler-utils tesseract-ocr
 
 # Sao chép file requirements.txt trước để tận dụng cache của Docker
 COPY requirements.txt .

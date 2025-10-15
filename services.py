@@ -3,7 +3,8 @@ import logging
 import asyncio
 import httpx
 from typing import Optional
-from docling.document_converter import DocumentConverter
+from unstructured.partition.auto import partition
+from unstructured.documents.elements import Table
 
 # --- Logging ---
 logger = logging.getLogger(__name__)
@@ -14,30 +15,38 @@ OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 
 # --- Service Call Functions ---
 
-async def call_docling_ocr(file_path: str) -> Optional[str]:
+async def call_unstructured_partition(file_path: str) -> Optional[str]:
     """
-    Processes a document file using the Docling library to perform OCR.
-
-    This function runs the synchronous Docling conversion in a separate thread
-    to avoid blocking the asyncio event loop.
+    Processes a document file using the unstructured.io library.
+    It can identify tables and preserve their structure as HTML.
 
     Args:
         file_path: The local path to the document file to process.
 
     Returns:
-        The extracted text in Markdown format, or an error message string if
-        the conversion fails.
+        The extracted content as a single string. Tables are converted to HTML.
     """
-    logger.info(f"Processing {file_path} with Docling library...")
+    logger.info(f"Processing {file_path} with unstructured.io library...")
     try:
-        def convert_sync():
-            converter = DocumentConverter()
-            result = converter.convert(file_path)
-            return result.document.export_to_markdown()
-        return await asyncio.to_thread(convert_sync)
+        def partition_sync():
+            # Use "hi_res" strategy for complex PDFs with tables
+            elements = partition(filename=file_path, strategy="hi_res")
+            
+            output_parts = []
+            for element in elements:
+                if isinstance(element, Table):
+                    # If the element is a table, get its HTML representation
+                    output_parts.append(element.metadata.text_as_html)
+                else:
+                    # Otherwise, just get the text
+                    output_parts.append(element.text)
+            
+            return "\n\n".join(output_parts)
+
+        return await asyncio.to_thread(partition_sync)
     except Exception as e:
-        logger.error(f"An unexpected error occurred during Docling conversion: {e}")
-        return f"[Error: Docling failed to process {os.path.basename(file_path)}]"
+        logger.error(f"An unexpected error occurred during unstructured partitioning: {e}", exc_info=True)
+        return f"[Error: Unstructured failed to process {os.path.basename(file_path)}]"
 
 async def call_openrouter_summarize(text: str, model: str) -> Optional[str]:
     """

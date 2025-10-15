@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes, CallbackQueryHandler
 
-from services import call_docling_ocr, call_openrouter_summarize, call_openai_transcribe
+from services import call_unstructured_partition, call_openrouter_summarize, call_openai_transcribe
 
 # --- Basic Setup ---
 load_dotenv()
@@ -39,23 +39,15 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
     user = update.effective_user
     await update.message.reply_html(rf"Hi {user.mention_html()}! Send me a document or an audio file.")
 
-async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+async def _process_file(update: Update, context: ContextTypes.DEFAULT_TYPE, file_id: str, file_name: str) -> None:
     """
-    Handles incoming documents. Downloads the file, performs OCR, and presents
-    the user with options to view content, summarize, or cancel.
+    A generic helper function to process a file (document or photo).
+    Downloads the file, performs OCR, and presents action buttons.
     """
-    document = update.message.document
-    file_name = document.file_name
-    
-    ALLOWED_EXTENSIONS = ('.pdf', '.png', '.jpg', '.jpeg', '.docx', '.pptx')
-    if not file_name.lower().endswith(ALLOWED_EXTENSIONS):
-        await update.message.reply_text(f"Sorry, I can only process the following file types: {', '.join(ALLOWED_EXTENSIONS)}")
-        return
-
     progress_message = await update.message.reply_text(f"⏳ Đang xử lý file: {file_name}\n[10%] Đã nhận file.")
     
-    file = await context.bot.get_file(document.file_id)
-    original_file_path = f"downloads/{document.file_id}_{file_name}"
+    file = await context.bot.get_file(file_id)
+    original_file_path = f"downloads/{file_id}_{file_name}"
     os.makedirs(os.path.dirname(original_file_path), exist_ok=True)
     
     try:
@@ -63,7 +55,7 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         await file.download_to_drive(original_file_path)
 
         await progress_message.edit_text(f"⏳ Đang xử lý file: {file_name}\n[50%] Đã tải xong, đang trích xuất văn bản...")
-        full_text = await call_docling_ocr(original_file_path)
+        full_text = await call_unstructured_partition(original_file_path)
 
         if full_text is None or not full_text.strip():
              await progress_message.edit_text("Không thể trích xuất văn bản từ tài liệu này.")
@@ -88,6 +80,27 @@ async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) ->
         # Clean up the downloaded file
         if os.path.exists(original_file_path):
             os.remove(original_file_path)
+
+async def handle_document(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """Handles incoming documents by calling the generic file processor."""
+    document = update.message.document
+    file_name = document.file_name
+    
+    ALLOWED_EXTENSIONS = ('.pdf', '.png', '.jpg', '.jpeg', '.docx', '.pptx')
+    if not file_name.lower().endswith(ALLOWED_EXTENSIONS):
+        await update.message.reply_text(f"Sorry, I can only process the following file types: {', '.join(ALLOWED_EXTENSIONS)}")
+        return
+
+    await _process_file(update, context, document.file_id, file_name)
+
+async def handle_photo(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    """
+    Handles incoming photos by selecting the largest one and calling the
+    generic file processor.
+    """
+    photo_file = update.message.photo[-1] # Get the largest photo
+    file_name = f"{photo_file.file_id}.jpg"
+    await _process_file(update, context, photo_file.file_id, file_name)
 
 async def button_handler(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handles all button presses from inline keyboards."""
@@ -226,6 +239,9 @@ def main() -> None:
     
     # on receiving a document
     application.add_handler(MessageHandler(filters.Document.ALL, handle_document))
+
+    # on receiving a photo
+    application.add_handler(MessageHandler(filters.PHOTO, handle_photo))
 
     # on receiving audio
     application.add_handler(MessageHandler(filters.AUDIO | filters.VOICE, handle_audio))
