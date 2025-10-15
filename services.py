@@ -41,12 +41,14 @@ async def call_unstructured_partition(file_path: str) -> Optional[str]:
                     # Otherwise, just get the text
                     output_parts.append(element.text)
             
-            return "\n\n".join(output_parts)
+            # Filter out any None or empty string values before joining to prevent TypeError
+            # and create a cleaner output.
+            return "\n\n".join(part for part in output_parts if part)
 
         return await asyncio.to_thread(partition_sync)
     except Exception as e:
         logger.error(f"An unexpected error occurred during unstructured partitioning: {e}", exc_info=True)
-        return f"[Error: Unstructured failed to process {os.path.basename(file_path)}]"
+        return f"[Error: Unstructured failed to process {os.path.basename(file_path)}. Details: {e!s}]"
 
 async def call_openrouter_summarize(text: str, model: str) -> Optional[str]:
     """
